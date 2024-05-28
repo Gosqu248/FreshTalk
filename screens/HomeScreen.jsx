@@ -1,4 +1,4 @@
-import { Alert, StyleSheet, Text, View } from 'react-native'
+import { Alert, Pressable, StyleSheet, Text, View } from 'react-native'
 import React, { useEffect, useLayoutEffect, useState, useContext } from 'react'
 import Entypo from '@expo/vector-icons/Entypo';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -7,8 +7,7 @@ import jwt_decode from "jwt-decode";
 import axios from 'axios'; 
 import { UserType } from "../UserContext";
 import { useNavigation } from "@react-navigation/native";
-
-//import User from "../components/User";
+import User from "../component/User";
 
 const HomeScreen = () => {
     
@@ -24,8 +23,13 @@ const HomeScreen = () => {
           ),    
           headerRight: () => (    
               <View style={styles.HeaderRightView}>
-                  <Entypo name="chat" size={24} color="black" />
+
+                <Pressable onPress={() => navigation.navigate("Login")} >
+                  <Entypo  name="chat" size={24} color="black" />
+                </Pressable>
+                <Pressable onPress={ () => navigation.navigate("Login")}>
                   <Ionicons name="people" size={24} color="black" />
+                </Pressable>  
 
               </View>        
           ),
@@ -44,7 +48,6 @@ const HomeScreen = () => {
             .get(`http://10.0.2.2:8000/users/${userId}`)
             .then((response) => {
               setUsers(response.data);
-              console.log("response.data ", response.data);
             })
             .catch((error) => {
               console.log("error retrieving users", error);
@@ -60,7 +63,12 @@ const HomeScreen = () => {
       
   return (
     <View>
-      <Text>HomeScreen</Text>
+      <View>
+           {users.map((item, index) => (
+            <User key={index} item={item} />
+          ))}
+      </View>
+      <Text>Home</Text>
     </View>
   )
 }
@@ -72,5 +80,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         gap: 10,
-    }
+    },
+   
 })

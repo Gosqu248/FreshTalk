@@ -37,14 +37,3 @@ const styles = StyleSheet.create({
 
 export default App;
 
-
-function GradientHeaderBackground() {
-  return (
-    <LinearGradient
-      colors={['#a8e063', '#56ab2f', '#004d00']}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 0, y: 1 }}      style={{ flex: 1 }}
-      
-    />
-  );
-}

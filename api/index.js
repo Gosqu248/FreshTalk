@@ -97,3 +97,45 @@ app.get("/users/:userId", (req, res) => {
   });
 
 
+  //endpoint to send a request to a user
+  app.post("/friend-request", async (req, res) => {
+    const { currentUserId, selectedUserId } = req.body;
+  
+    try {
+      //update the recepient's friendRequestsArray!
+      await User.findByIdAndUpdate(selectedUserId, {
+        $addToSet: { friendRequests: currentUserId },
+      });
+  
+      //update the sender's sentFriendRequests array
+      await User.findByIdAndUpdate(currentUserId, {
+        $addToSet: { sentFriendRequests: selectedUserId },
+      });
+  
+      res.sendStatus(200);
+    } catch (error) {
+      res.sendStatus(500);
+    }
+  });
+
+// endpoint to cancel a friend request
+app.post("/cancel-friend-request", async (req, res) => {
+    const { currentUserId, selectedUserId } = req.body;
+  
+    try {
+      // update the recipient's friendRequestsArray!
+      await User.findByIdAndUpdate(selectedUserId, {
+        $pull: { friendRequests: currentUserId },
+      });
+  
+      // update the sender's sentFriendRequests array
+      await User.findByIdAndUpdate(currentUserId, {
+        $pull: { sentFriendRequests: selectedUserId },
+      });
+  
+      res.sendStatus(200);
+    } catch (error) {
+      res.sendStatus(500);
+    }
+  });
+  

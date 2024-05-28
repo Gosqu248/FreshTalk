@@ -1,81 +1,55 @@
 import { Alert, KeyboardAvoidingView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { LinearGradient } from 'expo-linear-gradient';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useNavigation } from "@react-navigation/native";
-import axios from 'axios';
+import { useNavigation } from '@react-navigation/native';
 
-
-const LoginScreen = () => {
-
+const RegistierScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [image, setImage] = useState('');
+  
   const navigation = useNavigation();
 
-
-  useEffect(() => {
-    checkLoginStatus();
-  }, []);
-
-
-  const sateStates = () => {
-    setEmail("");
-    setPassword("");
-  }
-
-  const checkLoginStatus = async () => {
+  const handleRegister =  async () => {
     try {
-      const token = await AsyncStorage.getItem("authToken");
-
-      if (token) {
-        navigation.replace("Home");
-      } else {
-      }
-    } catch (error) {
-      console.log("error", error);
-    }
-  };
-
-  const handleLogin = async () => {
-
-    const user = {
-      email: email,
-      password: password,
-    };
-    
-    axios
-      .post("http://10.0.2.2:8000/login", user)
-      .then((response) => {
-        console.log(response);
-        const token = response.data.token;
-        AsyncStorage.setItem("authToken", token);
-    
-        Alert.alert("Logowanie udane", `Witamy Cię ${email}!`);
-        console.log("Zalogowano: " + email);
-        setEmail("");
-        setPassword("");
-        navigation.replace("Home");
-      })
-      .catch((error) => {
-        if (error.response) {
-          if (error.response.data.message === "User not found") {
-            Alert.alert("Logowanie nieudane", "Niezarejestrowany użytkownik");
-          } else if (error.response.data.message === "Invalid credentials") {
-            Alert.alert("Logowanie nieudane", "Nieprawidłowy email lub hasło");
-          } else {
-            Alert.alert("Logowanie nieudane", "Błąd logowania");
-          }
-          console.log("Nieudane logowanie: ", error.response.data.message);
-        } else if (error.request) {
-          Alert.alert("Błąd sieci", "Brak odpowiedzi serwera");
-          console.log("Błąd sieci: ", error.request);
-        } else {
-          Alert.alert("Błąd", "Coś poszło nie tak");
-          console.log("Inny błąd: ", error.message);
-        }
-        console.log("Błąd logowania: ", error);
+      const response = await fetch("http://10.0.2.2:8000/register", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          password,
+          image,
+        }),
       });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          Alert.alert(
+            "Rejestracja udana", 
+            "Udało ci się zarejestrować"
+          );
+          setName("");
+          setEmail("");
+          setPassword("");
+          setImage("");
+          console.log("Rejestracja udana: ");
+
+        } else {
+          throw new Error('Nieudana rejestracja' + data.message);
+        } 
+        } catch (error) {
+          Alert.alert(
+            "Rejestracja nieudana", 
+            "Spróbuj ponownie"
+          );
+          console.log("Rejestracja nieudana: " + error);
+    }
   };
 
   return (
@@ -88,7 +62,18 @@ const LoginScreen = () => {
       <KeyboardAvoidingView>
         <View style={styles.Container}>
           
-            <Text style={styles.Text1}>Greensenger </Text>
+            <Text style={styles.Text1}>FreshTalk </Text>
+
+            <View style={styles.EmailContainer}>
+            <Text style={styles.EmailText}>Nick</Text>
+            <TextInput
+              value={name}
+              onChangeText={(text) => setName(text)}
+              placeholder='Wprowadź nick'
+              placeholderTextColor={'lightgreen'}
+              style={styles.Input}
+            />
+          </View>
 
           <View style={styles.EmailContainer}>
             <Text style={styles.EmailText}>Email</Text>
@@ -112,37 +97,44 @@ const LoginScreen = () => {
               style={styles.Input}
             />
           </View>
+          <View style={styles.EmailContainer}>
+            <Text style={styles.EmailText}>Logo</Text>
+            <TextInput
+              value={image}
+              onChangeText={(text) => setImage(text)}
+              placeholder='Wprowadź logo'
+              placeholderTextColor={'lightgreen'}
+              style={styles.Input}
+            />
+          </View>
           
           <View style={styles.LoginButton}>
-            <TouchableOpacity onPress={handleLogin}>
-              <Text style={styles.LoginText}>Zaloguj się </Text>
+            <TouchableOpacity onPress={handleRegister}>
+              <Text style={styles.LoginText}>Zarejestruj się </Text>
             </TouchableOpacity>
           </View>
         </View>
 
         <View style={styles.Container2}>
 
-        <Text style={styles.SignText1}>Lub zaloguj się za pomocą</Text>
           
                     <View style={styles.SignContainer}>
-                        <Text style={styles.SignText1}> Nie masz konta?</Text>
+                        <Text style={styles.SignText1}> Masz konto?</Text>
                         <TouchableOpacity
                             onPress= {() => {
-                              sateStates();
-                              navigation.navigate('Register');
+                              navigation.goBack();
                             }}>
 
-                            <Text style={styles.SignText2}> Zarejestruj się</Text>
+                            <Text style={styles.SignText2}> Zaloguj się</Text>
                         </TouchableOpacity>
                     </View>
         </View>
       </KeyboardAvoidingView>
     </LinearGradient>
-
-  );
+  )
 }
 
-export default LoginScreen
+export default RegistierScreen
 
 const styles = StyleSheet.create({
   Background: {
@@ -156,7 +148,7 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     backgroundColor: 'darkgreen',
     width: wp('80'),
-    height: hp('52'),
+    height: hp('75'),
   },
  
   Text1: {
