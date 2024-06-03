@@ -1,12 +1,14 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
-import { LinearGradient } from 'expo-linear-gradient';
+import React from 'react';
+import { UserContext } from './UserContext';
+import HomeScreen from './screens/HomeScreen';
 import RegisterScreen from './screens/RegisterScreen';
 import LoginScreen from './screens/LoginScreen';
-import React from 'react';
-import HomeScreen from './screens/HomeScreen';
-import { UserContext } from './UserContext';
+import FriendsScreen from './screens/FriendsScreen';
+import ChatsScreen from './screens/ChatsScreen';
+import MessagesScreen from './screens/MessagesScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -18,7 +20,10 @@ const App = () => {
           <Stack.Navigator>
             <Stack.Screen name="Login" component={LoginScreen} options={{headerShown: false}}/>
             <Stack.Screen name="Register" component={RegisterScreen} options={{headerShown: false}}/>
-            <Stack.Screen name="Home" component={HomeScreen} />
+              <Stack.Screen name="Home" component={HomeScreen}  />
+              <Stack.Screen name="Friends" component={FriendsScreen} />
+              <Stack.Screen name="Chats" component={ChatsScreen} />
+              <Stack.Screen name="Messages" component={MessagesScreen} />
           </Stack.Navigator>
         </NavigationContainer>
       </UserContext>
@@ -29,7 +34,7 @@ const App = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#131414',
     alignItems: 'center',
     justifyContent: 'center',
   },

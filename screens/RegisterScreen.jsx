@@ -8,13 +8,12 @@ const RegistierScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
-  const [image, setImage] = useState('');
   
   const navigation = useNavigation();
 
   const handleRegister =  async () => {
     try {
-      const response = await fetch("http://10.0.2.2:8000/register", {
+      const response = await fetch("http://192.168.0.30:8000/register", {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -23,7 +22,6 @@ const RegistierScreen = () => {
           name,
           email,
           password,
-          image,
         }),
       });
 
@@ -37,8 +35,8 @@ const RegistierScreen = () => {
           setName("");
           setEmail("");
           setPassword("");
-          setImage("");
           console.log("Rejestracja udana: ");
+          navigation.navigate("Login");
 
         } else {
           throw new Error('Nieudana rejestracja' + data.message);
@@ -93,16 +91,6 @@ const RegistierScreen = () => {
               onChangeText={(text) => setPassword(text)}
               placeholder='Wprowadź hasło'
               secureTextEntry={true}
-              placeholderTextColor={'lightgreen'}
-              style={styles.Input}
-            />
-          </View>
-          <View style={styles.EmailContainer}>
-            <Text style={styles.EmailText}>Logo</Text>
-            <TextInput
-              value={image}
-              onChangeText={(text) => setImage(text)}
-              placeholder='Wprowadź logo'
               placeholderTextColor={'lightgreen'}
               style={styles.Input}
             />

@@ -1,8 +1,9 @@
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native'
+import { Alert, Pressable, StyleSheet, Text, View, StatusBar } from 'react-native'
 import React, { useEffect, useLayoutEffect, useState, useContext } from 'react'
 import Entypo from '@expo/vector-icons/Entypo';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import jwt_decode from "jwt-decode";
 import axios from 'axios'; 
 import { UserType } from "../UserContext";
@@ -17,18 +18,19 @@ const HomeScreen = () => {
 
     useLayoutEffect(() => {
       navigation.setOptions({
+          headerStyle: {backgroundColor: "#131414"},
           headerTitle: "",
           headerLeft:() => (
-              <Text style={{fontSize:16, fontWeight:"bold"}}> FreshTalk Chat </Text>
+              <Text style={{fontSize: wp(5), fontWeight:"bold", color: "white"}}> FreshTalk Chat </Text>
           ),    
           headerRight: () => (    
               <View style={styles.HeaderRightView}>
 
-                <Pressable onPress={() => navigation.navigate("Login")} >
-                  <Entypo  name="chat" size={24} color="black" />
+                <Pressable onPress={() => navigation.navigate("Chats")} >
+                  <Entypo  name="chat" size={wp(7)} color="white" />
                 </Pressable>
-                <Pressable onPress={ () => navigation.navigate("Login")}>
-                  <Ionicons name="people" size={24} color="black" />
+                <Pressable onPress={() => navigation.navigate("Friends")}>
+                  <Ionicons name="people" size={wp(7)} color="white" />
                 </Pressable>  
 
               </View>        
@@ -43,9 +45,11 @@ const HomeScreen = () => {
           const decodedToken = jwt_decode(token);
           const userId = decodedToken.id;
           setUserId(userId);
+          AsyncStorage.setItem("currentUserId", userId);
+
     
           axios
-            .get(`http://10.0.2.2:8000/users/${userId}`)
+            .get(`http://192.168.0.30:8000/users/${userId}`)
             .then((response) => {
               setUsers(response.data);
             })
@@ -55,14 +59,14 @@ const HomeScreen = () => {
         };
     
         fetchUsers();
-      }, []);
+      }, [users]);
 
 
-      console.log("userId ", userId);
-      console.log("users ", users);
+      
       
   return (
-    <View>
+    <View >
+      <StatusBar barStyle="light-content" />
       <View>
            {users.map((item, index) => (
             <User key={index} item={item} />
@@ -79,7 +83,7 @@ const styles = StyleSheet.create({
     HeaderRightView: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 10,
+        gap: wp(3),
     },
    
 })
