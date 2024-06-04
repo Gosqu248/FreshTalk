@@ -256,7 +256,7 @@ app.post("/messages", upload.single("imageFile"), async (req, res) => {
   try {
     const { senderId, recepientId, messageType, messageText } = req.body;
 
-    let imageUrl = messageType === "image" ? req.file.path : null;
+    let imageUrl = (messageType === "image" || messageType === "audio") ? req.file.path : null;
     if (imageUrl) {
       imageUrl = imageUrl.replace(/\\/g, "/");
     }
@@ -272,6 +272,7 @@ app.post("/messages", upload.single("imageFile"), async (req, res) => {
     });
 
     await newMessage.save();
+    console.log(newMessage);
     res.status(200).json({ message: "Message sent Successfully" });
   } catch (error) {
     console.log(error);

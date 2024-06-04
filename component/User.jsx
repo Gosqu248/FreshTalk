@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
     LogoContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginVertical: hp(1.2),
+        marginVertical: hp(1.5),
         marginLeft: wp(3),
     },
     Logo: {
@@ -113,9 +113,11 @@ const styles = StyleSheet.create({
     NameText: {
         fontSize: hp(2),
         fontWeight: 'bold',
+        color: '#ffffff',
     },
     EmailText: {
         fontSize: hp(1.8),
+        color: '#ffffff',
     },
     AddFriendButton: {
         padding: hp(1.5),

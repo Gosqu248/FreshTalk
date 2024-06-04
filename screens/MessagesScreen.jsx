@@ -1,14 +1,18 @@
-import { StyleSheet, Text, View, ScrollView, KeyboardAvoidingView, TextInput, Image, Pressable, Alert } from 'react-native'
+import { StyleSheet, Text, View, ScrollView, KeyboardAvoidingView, TextInput, Image, Pressable, Alert, Modal, Button} from 'react-native'
 import React, {useState, useContext, useLayoutEffect, useEffect, useRef} from 'react'
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { Foundation } from '@expo/vector-icons';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Ionicons } from '@expo/vector-icons';
 import EmojiSelector from 'react-native-emoji-selector';
 import { UserType } from '../UserContext';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
+import { Audio } from 'expo-av';
+import { RNCamera } from 'react-native-camera';
+
 
 const MessegesScreen = () => {
 
@@ -18,12 +22,19 @@ const MessegesScreen = () => {
       const [recepientData, setRecepientData] = useState();
       const navigation = useNavigation();
       const [selectedImage, setSelectedImage] = useState("");
+      const [selectedAudio, setSelectedAudio] = useState("");
       const route = useRoute();
       const { recepientId } = route.params;
       const [message, setMessage] = useState("");
       const { userId, setUserId } = useContext(UserType);
+      const [recording, setRecording] = useState(null);
+      const [modalVisible, setModalVisible] = useState(false);
+      const [countdown, setCountdown] = useState(0); // Zaczynamy odliczanie od 10
+
 
       const scrollViewRef = useRef();
+      const cameraRef = useRef(null);
+
 
       const handleEmojiPress = () => {
         setShowEmojiSelector(!showEmojiSelector);
@@ -85,7 +96,15 @@ const MessegesScreen = () => {
               name: "image.jpg",
               type: "image/jpeg",
             });
-          } else {
+         } else if (messageType === "audio") {
+            formData.append("messageType", "audio");
+            formData.append("imageFile", {
+              uri: imageUri,
+              name: "audio.m4a",
+              type: "audio/m4a",
+            });
+          } 
+          else {
             if(message.length > 0 ) {
               formData.append("messageType", "text");
               formData.append("messageText", message);
@@ -103,6 +122,7 @@ const MessegesScreen = () => {
           if (response.ok) {
             setMessage("");
             setSelectedImage("");
+            setSelectedAudio("");
             console.log("message sent successfully");
 
             fetchMessages();
@@ -124,13 +144,26 @@ const MessegesScreen = () => {
           });
 
           if (response.ok){
-            setSelectedMessages((prevSelectedMessages) =>
-              prevSelectedMessages.filter((id) => !messageId.includes(id))
+            Alert.alert(
+              "Usuwanie wiadomości",
+              "Czy na pewno chcesz usunąć tę wiadomość?",
+              [
+                {
+                  text: "Anuluj",
+                  style: "cancel"
+                },
+                { text: "OK", onPress: () => {
+                  setSelectedMessages((prevSelectedMessages) =>
+                    prevSelectedMessages.filter((id) => !messageId.includes(id))
+                  );
+              
+                  console.log("message deleted successfully");
+                  fetchMessages();
+                }}
+              ],
+              { cancelable: false }
             );
-
-            console.log("message deleted successfully");
-            fetchMessages();
-          } 
+          }
           } catch (error) {
             console.log("error deleting message", error);
         }
@@ -163,6 +196,7 @@ const MessegesScreen = () => {
         }
     };
     
+    
       const pickImage = async () => {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (status !== 'granted') {
@@ -192,7 +226,87 @@ const MessegesScreen = () => {
           setSelectedMessages((prevMessages) => [...prevMessages, message._id]);
         }
       }
+
+      const selectAllButLastMessage = (messages) => {
+        const allButLast = messages.slice(0, -1);
+        setSelectedMessages(allButLast);
+      }
+
+      const startRecording = async () => {
+        const { status } = await Audio.requestPermissionsAsync();
+        if (status !== 'granted') {
+          alert('Sorry, we need audio recording permissions to make this work!');
+          return;
+        }
+    
+        const newRecording = new Audio.Recording();
+        try {
+          await newRecording.prepareToRecordAsync(Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY);
+          await newRecording.startAsync();
+          setRecording(newRecording);
+          console
+        } catch (error) {
+          console.log(error);
+        }
+      };
+    
+      const deleteRecording = async () => {
+        try {
+          await recording.stopAndUnloadAsync();
+
+          setRecording(null);
+        } catch (error) {
+          console.log(error);
+        }
+      };
+
+      const stopAndSendRecord = async () => {
+        try {
+          await recording.stopAndUnloadAsync();
+          const uri = recording.getURI(); 
+          console.log(uri);
+
+          handleSend("audio", uri);
+
+          setRecording(null);
+        } catch (error) {
+          console.log(error);
+        }
+      }; 
+
+      useEffect(() => {
+          let timer= 0;
+          timer = setTimeout(() => {
+            setCountdown(countdown + 1);
+          }, 1000);
+          return () => clearTimeout(timer); // Czyścimy timer, gdy komponent jest odmontowywany
+        
+      }, [countdown]);
+
+        
+      const [sound, setSound] = useState();
+
+      async function playSound(uri) {
+        console.log('Loading Sound');
+        const { sound } = await Audio.Sound.createAsync(
+            uri 
+        );
+        setSound(sound);
       
+        console.log('Playing Sound');
+        await sound.playAsync(); 
+      }
+
+      useEffect(() => {
+        return sound
+          ? () => {
+              console.log('Unloading Sound');
+              sound.unloadAsync(); 
+            }
+          : undefined;
+      }, [sound]);
+    
+
       useLayoutEffect(() => {
         navigation.setOptions({
           headerTitle: "",
@@ -204,23 +318,18 @@ const MessegesScreen = () => {
   
                 {selectedMessages.length > 0 ? (
             <View>
-              <Text style={{ fontSize: 16, fontWeight: "500" }}>
+              <Text style={{ fontSize: 16, fontWeight: "500", color: "white"}}>
                 {selectedMessages.length}
               </Text>
             </View>
           ) : (
             <View style={{ flexDirection: "row", alignItems: "center" }}>
               <Image
-                style={{
-                  width: 30,
-                  height: 30,
-                  borderRadius: 15,
-                  resizeMode: "cover",
-                }}
+                style={styles.ProfileImage}
                 source={{ uri: recepientData?.image }}
               />
 
-              <Text style={{ marginLeft: 5, fontSize: 15, fontWeight: "bold", color: "white" }}>
+              <Text style={styles.RecepientNameText}>
                 {recepientData?.name}
               </Text>
             </View>
@@ -230,7 +339,7 @@ const MessegesScreen = () => {
           headerRight: () =>
             selectedMessages.length > 0 ? (
               <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-                <FontAwesome name="star" size={24} color="white" />
+                <AntDesign name="back" size={24} color="white" onPress={() => selectAllButLastMessage(selectedMessages)}/>
                 <MaterialIcons
                   onPress={() => deleteMessage(selectedMessages)}
                   name="delete"
@@ -268,13 +377,13 @@ const MessegesScreen = () => {
                     padding: 8,
                     maxWidth: "60%",
                     borderRadius: 7,
-                    margin: 10,
+                    margin: 5,
                   }
                 : {
                     alignSelf: "flex-start",
                     backgroundColor: "white",
                     padding: 8,
-                    margin: 10,
+                    margin: 5,
                     borderRadius: 7,
                     maxWidth: "60%",
                   },
@@ -338,14 +447,96 @@ const MessegesScreen = () => {
                 </View>
               </Pressable>
             </View>
-          )}
-        })}
+            )}
+            if(message.messageType === "audio"){
+            const baseUrl = "http://192.168.0.30:8000/files/";
+            const imageUrl = message.imageUrl;
+            const filename = imageUrl.split("/").pop();
+            const source = { uri: baseUrl + filename };
+
+
+              return (
+                <View key={index} >
+                {(!previousMessage || formatTime(message.timeStamp) !== formatTime(previousMessage.timeStamp)) && (
+                  <Text style={[styles.TimeText ]}> {formatTime(message.timeStamp)} </Text>
+                )}
+                <Pressable 
+                  onLongPress={() => handleSelectMessage(message)}
+                  style={[
+                    message?.senderId?._id === userId 
+                    ? {
+                      alignSelf: "flex-end",
+                      backgroundColor: "#DCF8C6",
+                      padding: 8,
+                      maxWidth: "60%",
+                      width: wp(30),
+                      borderRadius: 7,
+                      margin: 10,
+                      height: hp(5.5),
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                    }
+                  : {
+                      alignSelf: "flex-start",
+                      backgroundColor: "white",
+                      padding: 8,
+                      margin: 10,
+                      borderRadius: 7,
+                      maxWidth: "60%",
+                      width: wp(30),
+                      height: hp(5.5),
+                      flexDirection: 'row',
+                      alignItems: 'center',
+
+                    },
+  
+                isSelected && { width: "100%", backgroundColor: "#F0FFFF" },
+                  ]}
+                >
+                  <AntDesign style={{alignItems:'center'}} name="play" size={24} color="black" onPress={() => playSound(source)}/>
+                  <Text> .||. </Text>
+                </Pressable>
+              </View>
+              )
+            }
+          })}
       </ScrollView>
 
       <View style={styles.BottomContainer}>
         <View style={styles.IconsContainer}>
-          <FontAwesome onPress={pickImage} name="camera" size={hp(4)} color="lightgrey" />
-         <FontAwesome name="microphone" size={hp(4)} color="lightgrey" />
+          <FontAwesome style={{marginRight: wp(3)}} name="camera" size={hp(3.5)} color="lightgrey" />
+          <Foundation style={{marginRight: wp(3)}} onPress={pickImage} name="photo" size={hp(3.5)} color="lightgrey" />
+          <FontAwesome 
+          name="microphone" 
+          size={hp(3.5)} 
+          color="lightgrey" 
+          onPress={() => {!recording && startRecording(); setModalVisible(true); setCountdown(0)}}
+        />
+
+
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={modalVisible}
+            onRequestClose={() => {
+              setModalVisible(!modalVisible);
+            }}
+          >
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>
+              <MaterialIcons
+                 onPress={() => {recording && deleteRecording(); setModalVisible(false)}}
+                  name="delete"
+                  size={hp(3.5)}
+                  color="lightgrey"
+                />
+                    <Text style={{color: "lightgrey",}}>Czas nagrania: {countdown}</Text>
+
+              <Ionicons name="send" size={hp(3.5)} color="lightgrey" onPress={() => {stopAndSendRecord(); setModalVisible(false);}} 
+/>
+              </View>
+            </View>
+        </Modal>
         </View>
         <View style={styles.MessageInputContainer}>
           <View style={styles.InputContainer}>
@@ -358,10 +549,10 @@ const MessegesScreen = () => {
           />
           </View>
           
-          <AntDesign onPress={handleEmojiPress} name="smile-circle" size={hp(4)} color="lightgrey" />
+          <AntDesign onPress={handleEmojiPress} name="smile-circle" size={hp(3)} color="lightgrey" />
         </View>
         
-        <Ionicons onPress={() => handleSend("text")} name="send" size={hp(4)} color="lightgrey" />
+        <Ionicons onPress={() => handleSend("text")} name="send" size={hp(3.5)} color="lightgrey" />
       </View>
 
       {showEmojiSelector && <EmojiSelector onEmojiSelected={emoji => setMessage((prevMessage) => prevMessage + emoji)} 
@@ -463,14 +654,35 @@ const styles = StyleSheet.create({
   },
   MessageInput: {
     color: 'white',
-    fontSize: hp(2.7),
+    fontSize: hp(2.2),
     backgroundColor: '#lightgrey',
   },
   IconsContainer:{
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    width: wp(17),
+    width: wp(25),
   },
-  
+  centeredView: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalView: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%', // Aby modal rozciągał się na całą szerokość
+    position: 'absolute', // Pozycjonowanie absolutne
+    bottom: hp(1), // Umieszczenie na dole
+    backgroundColor: "rgba(0, 0, 0, 0.91)", // Czarne, półprzeźroczyste tło
+    padding: 10,
+    borderRadius: 50,
+    shadowColor: "#000",
+    
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5
+  },
+
 })

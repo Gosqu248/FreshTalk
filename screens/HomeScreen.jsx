@@ -65,7 +65,7 @@ const HomeScreen = () => {
       
       
   return (
-    <View >
+    <View style={styles.Container}>
       <StatusBar barStyle="light-content" />
       <View>
            {users.map((item, index) => (
@@ -80,10 +80,15 @@ const HomeScreen = () => {
 export default HomeScreen
 
 const styles = StyleSheet.create({
+    Container: {
+        flex: 1,
+        backgroundColor: '#131414',
+    },
     HeaderRightView: {
         flexDirection: 'row',
         alignItems: 'center',
         gap: wp(3),
+        
     },
    
 })
