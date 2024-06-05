@@ -9,6 +9,8 @@ import LoginScreen from './screens/LoginScreen';
 import FriendsScreen from './screens/FriendsScreen';
 import ChatsScreen from './screens/ChatsScreen';
 import MessagesScreen from './screens/MessagesScreen';
+import CameraScreen from './screens/CameraScreen';
+import ImageScreen from './screens/ImageScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -24,6 +26,8 @@ const App = () => {
               <Stack.Screen name="Friends" component={FriendsScreen} />
               <Stack.Screen name="Chats" component={ChatsScreen} />
               <Stack.Screen name="Messages" component={MessagesScreen} />
+              <Stack.Screen name="Camera" component={CameraScreen} />
+              <Stack.Screen name="Image" component={ImageScreen} />
           </Stack.Navigator>
         </NavigationContainer>
       </UserContext>

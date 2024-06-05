@@ -16,7 +16,8 @@ const ChatsScreen = () => {
         navigation.setOptions({
             headerStyle: {backgroundColor: "#131414"},
             headerTintColor: '#fff', // This sets the color of the header title to white
-            
+            headerTitleAlign: 'center',
+
         });    
     }, []); 
 
@@ -49,9 +50,8 @@ const ChatsScreen = () => {
     
     useEffect(() => {
         fetchMessagesAndSortChats();
-    }, []);
+    }, [chats]);
 
-    console.log(chats);
 
 return (
     <View style={styles.Container}>

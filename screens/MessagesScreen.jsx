@@ -8,10 +8,9 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Ionicons } from '@expo/vector-icons';
 import EmojiSelector from 'react-native-emoji-selector';
 import { UserType } from '../UserContext';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import { Audio } from 'expo-av';
-import { RNCamera } from 'react-native-camera';
 
 
 const MessegesScreen = () => {
@@ -30,6 +29,7 @@ const MessegesScreen = () => {
       const [recording, setRecording] = useState(null);
       const [modalVisible, setModalVisible] = useState(false);
       const [countdown, setCountdown] = useState(0); // Zaczynamy odliczanie od 10
+      const [newMessages, setNewMessages] = useState(false);
 
 
       const scrollViewRef = useRef();
@@ -42,7 +42,9 @@ const MessegesScreen = () => {
 
       useEffect(() => {
         scrollViewRef.current?.scrollToEnd({ animated: false });
-      }, [messages]);
+        setNewMessages(false);
+
+      }, [newMessages]);
 
       const fetchMessages = async () => {
         try {
@@ -51,6 +53,9 @@ const MessegesScreen = () => {
           const data = await response.json();
         
           if(response.ok){
+            if(data.length > messages.length) {
+              setNewMessages(true);
+            }
             setMessages(data);
           } else {
             console.log("error showing messages", response.status.message);
@@ -62,7 +67,7 @@ const MessegesScreen = () => {
 
       useEffect(() => {
         fetchMessages();
-      }, []);
+      }, [messages]);
 
       useEffect(() => {
         const fetchRecepientData = async () => {
@@ -411,6 +416,7 @@ const MessegesScreen = () => {
             )}
 
               <Pressable 
+                onPress={() => navigation.navigate("Image", {imageUrl: source.uri})}
                 onLongPress={() => handleSelectMessage(message)}
 
                 style={[
@@ -504,8 +510,24 @@ const MessegesScreen = () => {
 
       <View style={styles.BottomContainer}>
         <View style={styles.IconsContainer}>
-          <FontAwesome style={{marginRight: wp(3)}} name="camera" size={hp(3.5)} color="lightgrey" />
-          <Foundation style={{marginRight: wp(3)}} onPress={pickImage} name="photo" size={hp(3.5)} color="lightgrey" />
+          <FontAwesome 
+            style={{marginRight: wp(3)}} 
+            onPress={() => 
+              navigation.navigate("Camera", {
+                recepientId: recepientId, 
+                recepientName: recepientData?.name,
+                fetchMessages: fetchMessages,
+                handleSend: handleSend,
+              })}
+            name="camera" 
+            size={hp(3.5)} 
+            color="lightgrey" />
+          <Foundation 
+            style={{marginRight: wp(3)}} 
+            onPress={pickImage} 
+            name="photo" 
+            size={hp(3.5)} 
+            color="lightgrey" />
           <FontAwesome 
           name="microphone" 
           size={hp(3.5)} 
@@ -672,10 +694,10 @@ const styles = StyleSheet.create({
   modalView: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    width: '100%', // Aby modal rozciągał się na całą szerokość
-    position: 'absolute', // Pozycjonowanie absolutne
-    bottom: hp(1), // Umieszczenie na dole
-    backgroundColor: "rgba(0, 0, 0, 0.91)", // Czarne, półprzeźroczyste tło
+    width: '100%', 
+    position: 'absolute', 
+    bottom: hp(1), 
+    backgroundColor: "rgba(0, 0, 0, 0.91)", 
     padding: 10,
     borderRadius: 50,
     shadowColor: "#000",
