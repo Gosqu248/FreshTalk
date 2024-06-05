@@ -6,7 +6,7 @@ import { UserContext } from './UserContext';
 import HomeScreen from './screens/HomeScreen';
 import RegisterScreen from './screens/RegisterScreen';
 import LoginScreen from './screens/LoginScreen';
-import FriendsScreen from './screens/FriendsScreen';
+import ProfileScreen from './screens/ProfileScreen';
 import ChatsScreen from './screens/ChatsScreen';
 import MessagesScreen from './screens/MessagesScreen';
 import CameraScreen from './screens/CameraScreen';
@@ -23,8 +23,8 @@ const App = () => {
             <Stack.Screen name="Login" component={LoginScreen} options={{headerShown: false}}/>
             <Stack.Screen name="Register" component={RegisterScreen} options={{headerShown: false}}/>
               <Stack.Screen name="Home" component={HomeScreen}  />
-              <Stack.Screen name="Friends" component={FriendsScreen} />
-              <Stack.Screen name="Chats" component={ChatsScreen} />
+              <Stack.Screen name="Profil" component={ProfileScreen} />
+              <Stack.Screen name="Czaty" component={ChatsScreen} />
               <Stack.Screen name="Messages" component={MessagesScreen} />
               <Stack.Screen name="Camera" component={CameraScreen} />
               <Stack.Screen name="Image" component={ImageScreen} />

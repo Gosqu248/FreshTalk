@@ -18,7 +18,7 @@ const CameraScreen = () => {
   const { userId, setUserId } = useContext(UserType);
 
   const route = useRoute();
-  const { recepientId, recepientName, fetchMessages, handleSend } = route.params;
+  const { recepientId, recepientName } = route.params;
 
   const [facing, setFacing] = useState('back');
   const [permission, requestPermission] = useCameraPermissions();
@@ -28,16 +28,37 @@ const CameraScreen = () => {
   useLayoutEffect(() => {
     navigation.setOptions({
         headerShown: false,
-        headerStyle: {backgroundColor: "#131414"},
-        headerTintColor: '#fff', // This sets the color of the header title to white
-        headerTitleAlign: 'center',
-        headerTitle: "",
     });    
 }, []); 
 
   const sendImage = async () => {
-    handleSend("image", photoUri);
-    navigation.goBack();
+    try {
+      const formData = new FormData();
+      formData.append("senderId", userId);
+      formData.append("recepientId", recepientId);
+
+      formData.append("messageType", "image");
+            formData.append("imageFile", {
+              uri: photoUri,
+              name: "image.jpg",
+              type: "image/jpeg",
+    });
+
+    const response = await fetch("http://192.168.0.30:8000/messages", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (response.ok) {
+      console.log("message sent successfully");
+      navigation.goBack();
+    } else {
+      console.log("error in sending the message");
+      navigation.goBack();
+    }
+  } catch (error) {
+    console.log("error in sending the message", error);
+  }
   };
 
 
@@ -79,13 +100,14 @@ const CameraScreen = () => {
       }
   };
 
+  
   return (
     <View style={styles.container}>
      { photoDone 
         ? ( <ImageBackground source={{ uri:  photoUri}} style={styles.ImageContainer} >
-            <View style={styles.xContainer}>
+              <View style={styles.xContainer}>
                  <Feather name="x" size={wp(10)} color="lightgrey" onPress={() => {setPhotoDone(false)}}/>              
-                </View>
+              </View>
             
             <View style={styles.BottomContainer}>
               <View style={styles.SenderContainer}>

@@ -323,7 +323,7 @@ const MessegesScreen = () => {
   
                 {selectedMessages.length > 0 ? (
             <View>
-              <Text style={{ fontSize: 16, fontWeight: "500", color: "white"}}>
+              <Text style={{ fontSize: hp(3), fontWeight: "500", color: "white"}}>
                 {selectedMessages.length}
               </Text>
             </View>
@@ -344,12 +344,13 @@ const MessegesScreen = () => {
           headerRight: () =>
             selectedMessages.length > 0 ? (
               <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-                <AntDesign name="back" size={24} color="white" onPress={() => selectAllButLastMessage(selectedMessages)}/>
+                <AntDesign name="back" size={hp(4)} color="white" onPress={() => selectAllButLastMessage(selectedMessages)}/>
                 <MaterialIcons
                   onPress={() => deleteMessage(selectedMessages)}
                   name="delete"
-                  size={24}
+                  size={hp(4)}
                   color="white"
+                  style={{ marginRight: wp(3), marginLeft: wp(3)}}
                 />
               </View>
             ) : null,
@@ -416,7 +417,7 @@ const MessegesScreen = () => {
             )}
 
               <Pressable 
-                onPress={() => navigation.navigate("Image", {imageUrl: source.uri})}
+                onPress={() => navigation.navigate("Image", {imageSource: source})}
                 onLongPress={() => handleSelectMessage(message)}
 
                 style={[
@@ -516,8 +517,6 @@ const MessegesScreen = () => {
               navigation.navigate("Camera", {
                 recepientId: recepientId, 
                 recepientName: recepientData?.name,
-                fetchMessages: fetchMessages,
-                handleSend: handleSend,
               })}
             name="camera" 
             size={hp(3.5)} 

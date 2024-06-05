@@ -336,3 +336,33 @@ app.delete("/deleteMessages", async (req, res) => {
 });
 
 
+//endpoint to update the user image or password
+app.put("/user/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { image, password } = req.body;
+
+    const user = await User.findById(userId);
+
+    if (image) {
+      user.image = image;
+    }
+
+    if (password) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      user.password = hashedPassword;
+    }
+
+    await user.save();
+
+    console.log(user);
+
+    res.json({ message: "User updated successfully" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+
+

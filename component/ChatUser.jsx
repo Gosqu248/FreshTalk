@@ -58,7 +58,6 @@ const fetchMessages = async () => {
   
   const lastMessage = messages[messages.length - 1];
 
-
   return (
     <Pressable style={styles.Container}
         onPress={() => navigation.navigate("Messages", {
@@ -69,15 +68,15 @@ const fetchMessages = async () => {
         <View style={styles.TextContainer}>
             <Text style={styles.NameText}>{item?.name}</Text>  
             { lastMessage 
-            ? (
+              ? (
                 lastMessage?.messageType === "image"
-                ? <Text style={styles.LastSentText}>Wysłano zdjęcie</Text>
+                ? <Text style={styles.LastSentText}>{lastMessage?.recepientId === item?._id ? "Ty:  " : ""}Wysłano zdjęcie</Text>
                 : (lastMessage?.messageType === "audio"
-                ? <Text style={styles.LastSentText}>Wysłano wiadomość głosową</Text>
-                : <Text style={styles.LastSentText}>{lastMessage?.message}</Text> 
+                  ? <Text style={styles.LastSentText}>{lastMessage?.recepientId === item?._id ? "Ty:  " : ""}Wysłano wiadomość głosową</Text>
+                  : <Text style={styles.LastSentText}>{lastMessage?.recepientId === item?._id ? "Ty:  " : ""}{lastMessage?.message}</Text> 
                 )
-            )
-            : <Text style={styles.LastSentText}>Zacznij konwersacje</Text>
+              )
+              : <Text style={styles.LastSentText}>Zacznij konwersacje</Text>
             }
         </View>
 
@@ -103,6 +102,8 @@ const styles = StyleSheet.create({
         paddingBottom: hp(2.5),
         borderWidth: hp(0.1),
         borderColor: "#333634",
+        borderRadius: 20,
+        marginBottom: hp(1),
     },
     Logo: {
         width: wp(14),

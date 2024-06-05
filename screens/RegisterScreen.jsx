@@ -52,9 +52,9 @@ const RegistierScreen = () => {
 
   return (
     <LinearGradient
-      colors={['#a8e063', '#56ab2f', '#004d00']}
-      start={{ x: 1, y: 0 }}
-      end={{ x: 0, y: 1 }}
+      colors={['#0A0A0A', '#131414', '#191919']}
+      start={{ x: 1, y: 1 }}
+      end={{ x: 1, y: 0 }}
       style={styles.Background}>
 
       <KeyboardAvoidingView>
@@ -63,12 +63,12 @@ const RegistierScreen = () => {
             <Text style={styles.Text1}>FreshTalk </Text>
 
             <View style={styles.EmailContainer}>
-            <Text style={styles.EmailText}>Nick</Text>
+            <Text style={styles.EmailText}>Nazwa</Text>
             <TextInput
               value={name}
               onChangeText={(text) => setName(text)}
-              placeholder='Wprowadź nick'
-              placeholderTextColor={'lightgreen'}
+              placeholder='Wprowadź nazwę'
+              placeholderTextColor={'#0FFFFF'}
               style={styles.Input}
             />
           </View>
@@ -79,7 +79,7 @@ const RegistierScreen = () => {
               value={email}
               onChangeText={(text) => setEmail(text)}
               placeholder='Wprowadź email'
-              placeholderTextColor={'lightgreen'}
+              placeholderTextColor={'#0FFFFF'}
               style={styles.Input}
             />
           </View>
@@ -91,31 +91,33 @@ const RegistierScreen = () => {
               onChangeText={(text) => setPassword(text)}
               placeholder='Wprowadź hasło'
               secureTextEntry={true}
-              placeholderTextColor={'lightgreen'}
+              placeholderTextColor={'#0FFFFF'}
               style={styles.Input}
             />
           </View>
           
-          <View style={styles.LoginButton}>
+          <LinearGradient
+            colors={['#ADD8E6', '#0FFFFF']}
+            style={styles.LoginButton}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }} >
             <TouchableOpacity onPress={handleRegister}>
               <Text style={styles.LoginText}>Zarejestruj się </Text>
             </TouchableOpacity>
-          </View>
+          </LinearGradient>
         </View>
 
         <View style={styles.Container2}>
-
           
-                    <View style={styles.SignContainer}>
-                        <Text style={styles.SignText1}> Masz konto?</Text>
-                        <TouchableOpacity
-                            onPress= {() => {
-                              navigation.goBack();
-                            }}>
-
-                            <Text style={styles.SignText2}> Zaloguj się</Text>
-                        </TouchableOpacity>
-                    </View>
+         <View style={styles.SignContainer}>
+             <Text style={styles.SignText1}> Masz konto?</Text>
+             <TouchableOpacity
+                 onPress= {() => {
+                   navigation.goBack();
+                 }}>
+                 <Text style={styles.SignText2}> Zaloguj się</Text>
+             </TouchableOpacity>
+         </View>
         </View>
       </KeyboardAvoidingView>
     </LinearGradient>
@@ -134,7 +136,7 @@ const styles = StyleSheet.create({
     marginTop: hp('4'),
     alignItems: 'center',
     borderRadius: 30,
-    backgroundColor: 'darkgreen',
+    backgroundColor: 'black',
     width: wp('80'),
     height: hp('75'),
   },
@@ -159,7 +161,7 @@ const styles = StyleSheet.create({
     marginVertical: hp('1'),
     width: wp('50'),
     height: hp('5'),
-    color: 'lightgreen',
+    color: '#0FFFFF',
     fontSize: hp('2.7')
   },
   LoginButton:{
@@ -192,7 +194,7 @@ SignText1:{
     fontSize: wp('5'),
 },
 SignText2:{
-    color: 'lightgreen',
+    color: '#0FFFFF',
     fontSize: wp('5'),
     fontWeight: 'bold',
 },

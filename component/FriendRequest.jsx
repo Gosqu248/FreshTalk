@@ -78,10 +78,13 @@ const styles = StyleSheet.create({
         fontSize: wp(4),
         marginLeft: wp(2),
         flex: 1,
+        color: 'lightgrey',
     },
     NameText: {
         fontSize: wp(5),
         fontWeight: 'bold',
+        color: 'lightgrey',
+
     },
     AcceptButton: {
         padding: hp(1.5),

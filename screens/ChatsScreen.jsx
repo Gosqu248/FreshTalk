@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, Text, View, TextInput } from 'react-native'
 import React, {useContext, useEffect, useState, useLayoutEffect } from 'react'
 import { UserType } from '../UserContext'
 import { useNavigation } from '@react-navigation/native';
@@ -8,13 +8,14 @@ import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-nat
 
 
 const ChatsScreen = () => {
+    const navigation = useNavigation();
     const {userId, setUserId} = useContext(UserType);
     const [chats, setChats] = useState([]);
-    const navigation = useNavigation();
+    const [searchText, setSearchText] = useState('');
     
     useLayoutEffect(() => {
         navigation.setOptions({
-            headerStyle: {backgroundColor: "#131414"},
+            headerStyle: {backgroundColor: "black"},
             headerTintColor: '#fff', // This sets the color of the header title to white
             headerTitleAlign: 'center',
 
@@ -52,20 +53,32 @@ const ChatsScreen = () => {
         fetchMessagesAndSortChats();
     }, [chats]);
 
+    
+    const displayedChats = searchText
+    ? chats.filter(chat => 
+        chat.name.toLowerCase().includes(searchText.toLowerCase())
+      )
+    : chats;
+
 
 return (
-    <View style={styles.Container}>
-        <View>
-      {chats.map((item, index) => (
-        <ChatUser 
+    <View style={styles.container}>
+        <TextInput
+            style={styles.searchInput}
+            value={searchText}
+            onChangeText={setSearchText}
+            placeholder="Wyszukaj znajomego"
+            placeholderTextColor={'lightgrey'}
+            color= {'#fff'}
+        />
+        {displayedChats.map((item, index) => (
+            <ChatUser 
             key={index} 
             item={item} 
             chats={chats}
             setChats={setChats}
             />
-      ))}
-            
-        </View>
+        ))}
     </View>
   )
 }
@@ -74,12 +87,17 @@ export default ChatsScreen
 
 
 const styles = StyleSheet.create({
-    Container: {
+    container: {
         flex: 1,
         backgroundColor: '#131414',
     },
-    ChatsText: {
-      padding: wp(2.5),
-      marginHorizontal: wp(2),
-    }
-  })
+    searchInput: {
+        height: hp(6),
+        backgroundColor: '#4d4d4d',
+        borderColor: '#131414',
+        borderWidth: 1,
+        paddingLeft: wp(8),
+        margin: hp(2),
+        borderRadius: 50,
+    },
+  });

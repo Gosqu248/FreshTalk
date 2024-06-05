@@ -1,10 +1,11 @@
 import { Alert, KeyboardAvoidingView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { LinearGradient } from 'expo-linear-gradient';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from "@react-navigation/native";
 import axios from 'axios';
+import { UserType } from '../UserContext'
 
 
 const LoginScreen = () => {
@@ -12,6 +13,7 @@ const LoginScreen = () => {
   const navigation = useNavigation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const {userId, setUserId} = useContext(UserType);
 
   const sateStates = () => {
     setEmail("");
@@ -24,11 +26,8 @@ const LoginScreen = () => {
 
   const checkLoginStatus = async () => {
     try {
-      const token = await AsyncStorage.getItem("authToken");
-
-      if (token) {
+      if(userId) {
         navigation.replace("Home");
-      } else {
       }
     } catch (error) {
       console.log("error", error);
@@ -77,11 +76,10 @@ const LoginScreen = () => {
 
   return (
     <LinearGradient
-      colors={['#a8e063', '#56ab2f', '#004d00']}
-      start={{ x: 1, y: 0 }}
-      end={{ x: 0, y: 1 }}
-      style={styles.Background}>
-
+        colors={['#0A0A0A', '#131414', '#191919']}
+        start={{ x: 1, y: 1 }}
+        end={{ x: 1, y: 0 }}
+        style={styles.Background}>
       <KeyboardAvoidingView>
         <View style={styles.Container}>
           
@@ -93,7 +91,7 @@ const LoginScreen = () => {
               value={email}
               onChangeText={(text) => setEmail(text)}
               placeholder='Wprowadź email'
-              placeholderTextColor={'lightgreen'}
+              placeholderTextColor={'#0FFFFF'}
               style={styles.Input}
             />
           </View>
@@ -105,16 +103,21 @@ const LoginScreen = () => {
               onChangeText={(text) => setPassword(text)}
               placeholder='Wprowadź hasło'
               secureTextEntry={true}
-              placeholderTextColor={'lightgreen'}
+              placeholderTextColor={'#0FFFFF'}
               style={styles.Input}
             />
           </View>
           
-          <View style={styles.LoginButton}>
+          <LinearGradient
+            colors={['#ADD8E6', '#0FFFFF']}
+            style={styles.LoginButton}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }} >
             <TouchableOpacity onPress={handleLogin}>
               <Text style={styles.LoginText}>Zaloguj się </Text>
             </TouchableOpacity>
-          </View>
+          </LinearGradient>
+
         </View>
 
         <View style={styles.Container2}>
@@ -151,7 +154,7 @@ const styles = StyleSheet.create({
     marginTop: hp('4'),
     alignItems: 'center',
     borderRadius: 30,
-    backgroundColor: 'darkgreen',
+    backgroundColor: 'black',
     width: wp('80'),
     height: hp('52'),
   },
@@ -176,11 +179,10 @@ const styles = StyleSheet.create({
     marginVertical: hp('1'),
     width: wp('50'),
     height: hp('5'),
-    color: 'lightgreen',
+    color: '#0FFFFF',
     fontSize: hp('2.7')
   },
   LoginButton:{
-    backgroundColor: 'lightgreen',
     width: wp('50'),
     height: hp('7'),
     alignItems: 'center',
@@ -209,7 +211,7 @@ SignText1:{
     fontSize: wp('5'),
 },
 SignText2:{
-    color: 'lightgreen',
+    color: '#0FFFFF',
     fontSize: wp('5'),
     fontWeight: 'bold',
 },
