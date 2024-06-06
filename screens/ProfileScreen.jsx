@@ -1,4 +1,4 @@
-import { Image, Pressable, StyleSheet, Text, View, Modal, Button, TextInput } from 'react-native'
+import { Image, Pressable, StyleSheet, Text, View, Modal, Button, TextInput, Alert } from 'react-native'
 import React, { useEffect, useContext, useState, useLayoutEffect} from 'react'
 import { UserType } from '../UserContext'
 import { useNavigation } from "@react-navigation/native";
@@ -10,6 +10,7 @@ import { Entypo } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
+import Dialog from "react-native-dialog";
 
 
 const ProfileScreen = () => {
@@ -21,6 +22,24 @@ const ProfileScreen = () => {
     const [modalVisible, setModalVisible] = useState(false); 
     const [oldPassword, setOldPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
+    const [isValidPassword, setIsValidPassword] = useState(null);
+
+    const [dialogVisible, setDialogVisible] = useState(false);
+    const [logoutDialogVisible, setLogoutDialogVisible] = useState(false);
+
+
+const showDialog = () => {
+  setDialogVisible(true);
+};
+
+const showDeleteSuccess = () => {
+  setDeleteSuccessVisible(true);
+};
+
+const handleCancel = () => {
+  setDialogVisible(false);
+};
+
 
     useLayoutEffect(() => {
       navigation.setOptions({
@@ -48,7 +67,9 @@ const ProfileScreen = () => {
   useEffect(() => {
     fetchUserData();
     setIsImageChange(false);
-  }, [isImageChange]);
+  }, [userData]);
+  
+
 
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -87,20 +108,96 @@ const ProfileScreen = () => {
     }
   };
 
-  const changePassword = () => {
+  const changePasswordHandle = () => {
     setModalVisible(true);
+    setOldPassword("");
+     setNewPassword("")
   };
 
+  const changePassword = async () => {
+    
 
-  const logout = async () => {
+    fetch(`http://192.168.0.30:8000/user/${userId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        oldPassword: oldPassword, 
+        newPassword: newPassword
+      })
+    })
+    .then(response => {
+      console.log('response received', response);
+      if (response.ok) {
+        Alert.alert(
+          "Zmieniono hasło",
+          "Pomyślnie udało się zmienić hasło.",
+          [
+            { text: "OK" }
+          ]
+        );
+      } else {
+        Alert.alert(
+          "Błąd",
+          "Nie udało się zmienić hasła. Spróbuj ponownie.",
+          [
+            { text: "OK" }
+          ]
+        );
+      }
+
+      return response.json();
+    })
+    .catch(error => {
+      console.error('Error:', error);
+    });
+
+    setNewPassword("");
+    setOldPassword("");
+
+  };
+
+  const handleDelete = async () => {
+    try {
+      const response = await fetch(`http://192.168.0.30:8000/user/${userId}`, {
+        method: 'DELETE',
+      });
+  
+      if (response.ok) {
+        setUserId(null);
+        navigation.replace("Login");
+        showDeleteSuccess();
+      } else {
+        console.log("error deleting account", response.status.message);
+      }
+    } catch (error) {
+      console.log("error deleting account", error);
+    }
+    setDialogVisible(false);
+  };
+  
+  const deleteAccount = () => {
+    showDialog();
+  };
+        
+
+
+
+  const handleLogoutCancel = () => {
+    setLogoutDialogVisible(false);
+  };
+  
+  const handleLogoutConfirm = async () => {
     try {
       setUserId(null);
       navigation.replace("Login");
+      setLogoutDialogVisible(false);
     } catch (error) {
       console.error('Error removing authToken:', error);
     }
   };
-
+        
     
   return (
     <View style={styles.Container}>
@@ -141,36 +238,70 @@ const ProfileScreen = () => {
                   />
                 </View>
 
-                <View style={styles.ButtonContainer} >
-                  <Text style={styles.Text}>Zmień hasło</Text>
-                </View>
+                <Pressable style={styles.ButtonContainer} onPress={changePassword}>
+                  <Text style={styles.Text2}>Zmień hasło</Text>
+                </Pressable>
               </View>
             </View>
-
           </Modal>
-      
+
         <Pressable style={styles.PressContainer} onPress={pickImage}>
           <Text style={styles.Text}>Zmień zdjęcie</Text>
           <FontAwesome name="photo" size={wp(8)} color="lightgrey" />
         </Pressable>
 
-        <Pressable style={styles.PressContainer} onPress={changePassword}>
+        <Pressable style={styles.PressContainer} onPress={changePasswordHandle}>
           <Text style={styles.Text}>Zmień hasło</Text>
           <MaterialIcons name="password" size={wp(8)} color="lightgrey" />
         </Pressable>
 
-        <Pressable style={styles.PressContainer}>
+        <Pressable style={styles.PressContainer} onPress={deleteAccount}>
           <Text style={styles.Text}>Usuń konto</Text>
           <AntDesign name="deleteuser" size={wp(8)} color="lightgrey" />
         </Pressable>
 
-        <Pressable style={styles.PressContainer} onPress={logout}>
+        <Pressable style={styles.PressContainer} onPress={() => setLogoutDialogVisible(true)}>
           <Text style={styles.Text}>Wyloguj się</Text>
           <Entypo name="log-out" size={wp(8)} color="lightgrey" />
         </Pressable>
       </View>
-          
-    
+
+       {/* Alert dialog for deleting account */}
+       <Dialog.Container 
+          visible={dialogVisible}
+          contentStyle={{ backgroundColor: '#282a36', borderRadius: 20, alignItems: 'center'}}
+        >
+          <Dialog.Title style={{ color: '#ff5555' }}>Usuwanie konta</Dialog.Title>
+          <Dialog.Description style={{ color: 'white' }}>
+            Czy na pewno chcesz usunąć swoje konto?
+          </Dialog.Description>
+          <Dialog.Button label="Anuluj" color="white" onPress={handleCancel}  style={{paddingRight: wp(20), fontSize: wp(4), fontWeight: 'bold'}}/>
+          <Dialog.Button label="Usuń" color="#ff5555" onPress={handleDelete} style={{paddingRight: wp(0), fontSize: wp(4), fontWeight: 'bold'}}/>
+        </Dialog.Container>
+
+        {/* Alert dialog for logging out */}
+        <Dialog.Container 
+          visible={logoutDialogVisible}
+          contentStyle={{ backgroundColor: '#282a36', borderRadius: 20, alignItems: 'center'}}
+        >
+          <Dialog.Title style={{ color: '#ff5555' }}>Wylogowywanie</Dialog.Title>
+          <Dialog.Description style={{ color: 'white' }}>
+            Czy na pewno chcesz się wylogować?
+          </Dialog.Description>
+          <Dialog.Button 
+            label="Anuluj" 
+            color="white" 
+            onPress={handleLogoutCancel}  
+            style={{paddingRight: wp(20), fontSize: wp(4), fontWeight: 'bold'}}
+          />
+          <Dialog.Button 
+            label="Wyloguj" 
+            color="#ff5555" 
+            onPress={handleLogoutConfirm} 
+            style={{paddingRight: wp(0), fontSize: wp(4), fontWeight: 'bold'}}
+          />
+        </Dialog.Container>
+
     </View>
   )
 }
@@ -243,6 +374,11 @@ ButtonContainer: {
   backgroundColor: '#616161',
   borderWidth: 1,
   borderColor: 'white',
+},
+Text2: {
+  fontSize: wp(6),
+  color: 'black',
+  fontWeight: '600',
 },
 
 })

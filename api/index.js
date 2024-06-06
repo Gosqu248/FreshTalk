@@ -340,7 +340,7 @@ app.delete("/deleteMessages", async (req, res) => {
 app.put("/user/:userId", async (req, res) => {
   try {
     const { userId } = req.params;
-    const { image, password } = req.body;
+    const { image, oldPassword, newPassword} = req.body;
 
     const user = await User.findById(userId);
 
@@ -348,21 +348,46 @@ app.put("/user/:userId", async (req, res) => {
       user.image = image;
     }
 
-    if (password) {
-      const hashedPassword = await bcrypt.hash(password, 10);
-      user.password = hashedPassword;
+    if (newPassword && oldPassword) {
+      const isMatch = await bcrypt.compare(oldPassword, user.password);
+
+            if (isMatch) {
+              const hashedPassword = await bcrypt.hash(newPassword, 10);
+              user.password = hashedPassword;
+              res.status(200).json({message: 'Changed password successful'});
+            } else {
+              return res.status(401).json({ message: 'Invalid credentials' });
+            }
     }
 
     await user.save();
 
     console.log(user);
+    console.log("User updated successfully");
 
-    res.json({ message: "User updated successfully" });
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
+
+//endpoint to delete the user
+app.delete("/user/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const deletedUser = await User.findByIdAndDelete(userId);
+
+    if (!deletedUser) {
+      return res.status(404).json({ message: "User not found" });
+    } 
+
+    res.json({ message: "User deleted successfully" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
 
 

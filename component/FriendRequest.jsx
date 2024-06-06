@@ -29,7 +29,7 @@ const FriendRequest = ({item, friendRequests, setFriendRequests}) => {
             setFriendRequests(
               friendRequests.filter((request) => request._id !== friendRequestId)
             );
-            //navigation.navigate("Chats");
+            
           }
         } catch (err) {
           console.log("error acceptin the friend request", err);

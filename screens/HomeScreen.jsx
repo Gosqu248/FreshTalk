@@ -67,9 +67,10 @@ const HomeScreen = () => {
         };
     
         fetchUsers();
+        fetchFriends();
+
       }, [users]);
 
-    useEffect(() => {
       const fetchFriends = async () => {
         try {
           const response = await axios.get(
@@ -90,8 +91,6 @@ const HomeScreen = () => {
           console.log("Error fetching friends: " + error);
         }
       };
-      fetchFriends();
-    }, []);
 
 
     const filterUsers = users.filter(user => 

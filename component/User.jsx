@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
         color: '#ffffff',
     },
     EmailText: {
-        fontSize: hp(1.8),
+        fontSize: hp(1.6),
         color: '#ffffff',
     },
     AddFriendButton: {

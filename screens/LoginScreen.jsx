@@ -26,7 +26,8 @@ const LoginScreen = () => {
 
   const checkLoginStatus = async () => {
     try {
-      if(userId) {
+      const token = await AsyncStorage.getItem("authToken");
+      if(userId !== null &&  token !== null) {
         navigation.replace("Home");
       }
     } catch (error) {
